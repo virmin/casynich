@@ -2,70 +2,204 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f0f13; color: #fff; margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
-        .casino-card { background: #1c1c24; border-radius: 20px; padding: 25px; width: 90%; max-width: 350px; border: 2px solid #32323d; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .slots { display: flex; justify-content: space-around; background: #000; border-radius: 12px; padding: 15px; margin: 20px 0; border: 1px solid #ffcc00; }
-        .slot { font-size: 40px; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; }
-        .btn-spin { background: linear-gradient(45deg, #ffcc00, #ff9900); border: none; color: #000; padding: 15px 40px; border-radius: 30px; font-size: 20px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; box-shadow: 0 4px 15px rgba(255, 204, 0, 0.3); }
-        .btn-spin:active { transform: scale(0.95); }
-        .balance-info { color: #888; margin-bottom: 10px; font-size: 14px; }
+        :root {
+            --bg-color: #0b0e16;
+            --card-bg: #161b2c;
+            --accent: #5d5fef;
+            --success: #00c853;
+            --text: #ffffff;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Верхняя панель навигации (как на скрине) */
+        .nav-tabs {
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 10px;
+            background: rgba(22, 27, 44, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .tab {
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(255,255,255,0.05);
+            transition: 0.3s;
+        }
+
+        .tab.active {
+            background: var(--accent);
+            box-shadow: 0 0 15px rgba(93, 95, 239, 0.4);
+        }
+
+        /* Основная карточка */
+        .main-container {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .casino-card {
+            background: var(--card-bg);
+            width: 100%;
+            border-radius: 24px;
+            padding: 30px 20px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .user-avatar {
+            font-size: 50px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        h2 { margin: 0; font-size: 24px; }
+        .status { color: #8b8ea8; font-size: 14px; margin-top: 5px; }
+
+        /* Слоты */
+        .slot-machine {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 30px 0;
+            background: #000;
+            padding: 20px;
+            border-radius: 16px;
+            border: 2px solid var(--accent);
+        }
+
+        .slot {
+            width: 60px;
+            height: 60px;
+            background: #1a1a1a;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 35px;
+        }
+
+        /* Главная кнопка (как на скрине) */
+        .btn-main {
+            background: linear-gradient(90deg, #00c853, #00e676);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 18px;
+            border-radius: 18px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: transform 0.1s;
+        }
+
+        .btn-main:active { transform: scale(0.96); }
+
+        .footer-tag {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #4e5264;
+        }
     </style>
 </head>
 <body>
-    <div class="casino-card">
-        <div class="balance-info">СТАВКА: 100$</div>
-        <div class="slots">
-            <div class="slot" id="s1">❓</div>
-            <div class="slot" id="s2">❓</div>
-            <div class="slot" id="s3">❓</div>
+
+    <div class="nav-tabs">
+        <div class="tab active">⚡ Смена</div>
+        <div class="tab">🏆 Рейтинг</div>
+        <div class="tab">📊 Моя</div>
+        <div class="tab">🔥 Сегодня</div>
+    </div>
+
+    <div class="main-container">
+        <div class="casino-card">
+            <span class="user-avatar">🌙</span>
+            <h2 id="username">Игрок</h2>
+            <div class="status" id="balance-display">Баланс: загрузка...</div>
+
+            <div class="slot-machine">
+                <div class="slot" id="s1">🎰</div>
+                <div class="slot" id="s2">🎰</div>
+                <div class="slot" id="s3">🎰</div>
+            </div>
+
+            <button class="btn-main" onclick="play()">
+                <div style="width: 12px; height: 12px; background: white; border-radius: 50%; opacity: 0.6;"></div>
+                КРУТИТЬ СПИН
+            </button>
         </div>
-        <button class="btn-spin" onclick="startSpin()">КРУТИТЬ</button>
-        <p id="msg" style="margin-top: 15px; color: #ffcc00; font-weight: bold;"></p>
+        
+        <div class="footer-tag">@casynichbot</div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        const symbols = ['💎', '🍒', '🍋', '🔔', '7️⃣', '🍀'];
+        tg.ready();
 
-        function startSpin() {
-            const btn = document.querySelector('.btn-spin');
+        document.getElementById('username').innerText = tg.initDataUnsafe.user?.first_name || "Влад";
+
+        const items = ['💎', '💰', '7️⃣', '🍒', '🍀', '⭐️'];
+
+        function play() {
+            const btn = document.querySelector('.btn-main');
             btn.disabled = true;
-            document.getElementById('msg').innerText = "Удачи...";
             
-            let count = 0;
-            const interval = setInterval(() => {
-                document.getElementById('s1').innerText = symbols[Math.floor(Math.random() * symbols.length)];
-                document.getElementById('s2').innerText = symbols[Math.floor(Math.random() * symbols.length)];
-                document.getElementById('s3').innerText = symbols[Math.floor(Math.random() * symbols.length)];
-                count++;
-                if (count > 15) {
-                    clearInterval(interval);
-                    finishSpin();
+            let spins = 0;
+            const timer = setInterval(() => {
+                document.getElementById('s1').innerText = items[Math.floor(Math.random() * items.length)];
+                document.getElementById('s2').innerText = items[Math.floor(Math.random() * items.length)];
+                document.getElementById('s3').innerText = items[Math.floor(Math.random() * items.length)];
+                spins++;
+                
+                if (spins > 15) {
+                    clearInterval(timer);
+                    checkResult();
                 }
-            }, 80);
+            }, 70);
         }
 
-        function finishSpin() {
-            const res = [
-                symbols[Math.floor(Math.random() * symbols.length)],
-                symbols[Math.floor(Math.random() * symbols.length)],
-                symbols[Math.floor(Math.random() * symbols.length)]
-            ];
-            document.getElementById('s1').innerText = res[0];
-            document.getElementById('s2').innerText = res[1];
-            document.getElementById('s3').innerText = res[2];
+        function checkResult() {
+            const r1 = document.getElementById('s1').innerText;
+            const r2 = document.getElementById('s2').innerText;
+            const r3 = document.getElementById('s3').innerText;
 
-            const isWin = res[0] === res[1] && res[1] === res[2];
-            const resultData = { win: isWin, combo: res.join('') };
-
-            // ОТПРАВКА ДАННЫХ В БОТА
+            const isWin = (r1 === r2 && r2 === r3);
+            
             setTimeout(() => {
-                tg.sendData(JSON.stringify(resultData));
-                document.querySelector('.btn-spin').disabled = false;
+                tg.sendData(JSON.stringify({
+                    win: isWin,
+                    combo: r1 + r2 + r3
+                }));
+                document.querySelector('.btn-main').disabled = false;
             }, 500);
         }
     </script>
