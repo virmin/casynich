@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f0f13; color: #fff; margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+        .casino-card { background: #1c1c24; border-radius: 20px; padding: 25px; width: 90%; max-width: 350px; border: 2px solid #32323d; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .slots { display: flex; justify-content: space-around; background: #000; border-radius: 12px; padding: 15px; margin: 20px 0; border: 1px solid #ffcc00; }
+        .slot { font-size: 40px; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; }
+        .btn-spin { background: linear-gradient(45deg, #ffcc00, #ff9900); border: none; color: #000; padding: 15px 40px; border-radius: 30px; font-size: 20px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; box-shadow: 0 4px 15px rgba(255, 204, 0, 0.3); }
+        .btn-spin:active { transform: scale(0.95); }
+        .balance-info { color: #888; margin-bottom: 10px; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="casino-card">
+        <div class="balance-info">СТАВКА: 100$</div>
+        <div class="slots">
+            <div class="slot" id="s1">❓</div>
+            <div class="slot" id="s2">❓</div>
+            <div class="slot" id="s3">❓</div>
+        </div>
+        <button class="btn-spin" onclick="startSpin()">КРУТИТЬ</button>
+        <p id="msg" style="margin-top: 15px; color: #ffcc00; font-weight: bold;"></p>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        const symbols = ['💎', '🍒', '🍋', '🔔', '7️⃣', '🍀'];
+
+        function startSpin() {
+            const btn = document.querySelector('.btn-spin');
+            btn.disabled = true;
+            document.getElementById('msg').innerText = "Удачи...";
+            
+            let count = 0;
+            const interval = setInterval(() => {
+                document.getElementById('s1').innerText = symbols[Math.floor(Math.random() * symbols.length)];
+                document.getElementById('s2').innerText = symbols[Math.floor(Math.random() * symbols.length)];
+                document.getElementById('s3').innerText = symbols[Math.floor(Math.random() * symbols.length)];
+                count++;
+                if (count > 15) {
+                    clearInterval(interval);
+                    finishSpin();
+                }
+            }, 80);
+        }
+
+        function finishSpin() {
+            const res = [
+                symbols[Math.floor(Math.random() * symbols.length)],
+                symbols[Math.floor(Math.random() * symbols.length)],
+                symbols[Math.floor(Math.random() * symbols.length)]
+            ];
+            document.getElementById('s1').innerText = res[0];
+            document.getElementById('s2').innerText = res[1];
+            document.getElementById('s3').innerText = res[2];
+
+            const isWin = res[0] === res[1] && res[1] === res[2];
+            const resultData = { win: isWin, combo: res.join('') };
+
+            // ОТПРАВКА ДАННЫХ В БОТА
+            setTimeout(() => {
+                tg.sendData(JSON.stringify(resultData));
+                document.querySelector('.btn-spin').disabled = false;
+            }, 500);
+        }
+    </script>
+</body>
+</html>
